@@ -11,10 +11,15 @@ import { S3Module } from './s3/s3.module';
 import { QuestionController } from './question/question.controller';
 import { QuestionModule } from './question/question.module';
 import { QuestionService } from './question/question.service';
+import { AppGateway } from './app.gateway';
+import { RoomHandler } from './handlers/room.handler';
+import { RoomController } from './room/room.controller';
+import { RoomModule } from './room/room.module';
+import { RoomService } from './room/room.service';
 
 @Module({
-  imports: [AuthModule, UsersModule, QuizzModule, S3Module, QuestionModule],
-  controllers: [AppController, QuizzController, QuestionController],
-  providers: [QuestionService, QuizzService, AppService, PrismaService],
+  imports: [AuthModule, UsersModule, QuizzModule, S3Module, QuestionModule, RoomModule],
+  controllers: [AppController, QuizzController, QuestionController, RoomController],
+  providers: [RoomService, QuestionService, QuizzService, AppService, PrismaService, AppGateway, RoomHandler],
 })
 export class AppModule {}

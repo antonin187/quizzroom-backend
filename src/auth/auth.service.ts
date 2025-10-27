@@ -24,10 +24,10 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     const normalizedEmail = email.toLowerCase().trim();
     const user = await this.usersService.findByEmail(normalizedEmail);
-    if (!user) throw new UnauthorizedException('Aucun utilisateur trouvé');
+    if (!user) throw new UnauthorizedException('No user found');
 
     const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) throw new UnauthorizedException('Email ou mot de passe invalide   ');
+    if (!isValid) throw new UnauthorizedException('Invalid email or password');
 
     return user;
   }

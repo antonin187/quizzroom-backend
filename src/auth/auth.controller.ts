@@ -28,6 +28,6 @@ export class AuthController {
       maxAge: 3 * 24 * 60 * 60 * 1000, // 7 jours
     });
 
-    return { message: 'Connexion réussie' };
+    return { message: 'Sucessful connexion' };
   }
 }
