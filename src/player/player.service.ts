@@ -105,6 +105,7 @@ export class PlayerService {
         chosenIndex: answer.chosenIndex,
         correctIndex: answer.question?.answerIndex,
         score: answer.player?.score,
+        input: answer.input,
       };
     } catch (error) {
       throw error; // laisse la stack complète à l'appelant

@@ -21,6 +21,7 @@ export class AnswerService {
             ? { connect: { id: data.questionId } }
             : undefined,
           room: data.roomId ? { connect: { id: data.roomId } } : undefined,
+          input: data.input,
           isCorrect: data.isCorrect
         },
       });
@@ -91,6 +92,25 @@ export class AnswerService {
     if (!answer) {
       throw new NotFoundException(
         "Aucune question trouvée pour le joueur ayant pou id : " + playerId,
+      );
+    }
+
+    return answer;
+  }
+
+  async updateIsCorrect(answerId: number, isCorrect: boolean) {
+    const answer = await this.prisma.answer.update({
+      where: {
+        id: answerId
+      },
+      data: {
+        isCorrect: isCorrect
+      }
+    });
+
+    if (!answer) {
+      throw new NotFoundException(
+        "Aucune réponse trouvée ayant pour id : " + answerId,
       );
     }
 

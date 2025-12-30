@@ -5,6 +5,7 @@ import { PlayerService } from 'src/player/player.service';
 import { PrismaService } from 'src/prisma.service';
 import { QuestionService } from 'src/question/question.service';
 import { QuizzService } from 'src/quizz/quizz.service';
+import { QuestionType } from 'src/room/enums/question-types.enum';
 import { RoomStatus } from 'src/room/enums/room-status.enum';
 import { RoomService } from 'src/room/room.service';
 
@@ -357,6 +358,48 @@ export class RoomHandler {
       questionId: data.questionId,
       roomId: roomId,
       isCorrect: isResponseCorrect,
+      input: ''
+    });
+
+    if (!answer) {
+      console.log('Impossible de créer la réponse');
+      return;
+    }
+
+    server.to('admin_' + roomId).emit('responseReceived', responseReceived);
+    server.to('screen_' + roomId).emit('responseReceived', responseReceived);
+  }
+
+  async receiveResponseInput(
+    server: Server,
+    client: Socket,
+    data: { inputResponse: string; questionId: number },
+  ) {
+    const { roomId, pseudo } = client.data;
+    console.log('data ' + pseudo);
+    console.log(data);
+    const responseReceived = {
+      pseudo: pseudo,
+      ...data,
+    };
+
+    const player = await this.playerService.findByPseudoRoomId(pseudo, roomId);
+
+    const question = await this.questionService.findById(data.questionId);
+
+    if (!player && !question) {
+      return;
+    }
+
+    console.log("data.inputResponse : " + data.inputResponse)
+
+    const answer = await this.answerService.create({
+      chosenIndex: 0,
+      playerId: player.id,
+      questionId: data.questionId,
+      roomId: roomId,
+      input: data.inputResponse,
+      isCorrect: false,
     });
 
     if (!answer) {
@@ -380,7 +423,8 @@ export class RoomHandler {
       }
 
       // Récupération de la question courante
-      const currentQuestionId = await this.roomService.currentQuestionIdByRoomId(roomId);
+      const currentQuestionId =
+        await this.roomService.currentQuestionIdByRoomId(roomId);
       if (typeof currentQuestionId !== 'number') {
         console.log("❌ checkTheAnswers - Aucun questionId n'a été trouvé.");
         return;
@@ -425,9 +469,7 @@ export class RoomHandler {
 
       server.to('room_' + roomId).emit('resultsAvailable');
       server.to('admin_' + roomId).emit('resultsAvailable');
-      server
-        .to('screen_' + roomId)
-        .emit('resultsAvailable');
+      server.to('screen_' + roomId).emit('resultsAvailable');
     } catch (error) {
       console.error('❌ checkTheAnswers - Erreur inattendue:', error);
     }

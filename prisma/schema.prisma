@@ -41,6 +41,8 @@ model Question {
   choices     String[]
   answerIndex Int
 
+  type String @default("QCM")
+
   // Relation Many-to-One vers Quizz
   quizzId Int?
   quizz   Quizz? @relation(fields: [quizzId], references: [id])
@@ -106,6 +108,8 @@ model Answer {
   room   Room? @relation(fields: [roomId], references: [id])
 
   isCorrect Boolean @default(false)
+
+  input String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

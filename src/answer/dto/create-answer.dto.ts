@@ -1,4 +1,4 @@
-import { IsBoolean, IsEmail, IsInt, IsString } from 'class-validator';
+import { IsBoolean, IsEmail, IsInt, IsOptional, IsString } from 'class-validator';
 
 export class CreateAnswerDto {
 
@@ -16,4 +16,10 @@ export class CreateAnswerDto {
 
   @IsBoolean()
   isCorrect: boolean;
+
+  @IsOptional()
+  @IsString()
+  input: string;
+
+
 }

@@ -142,11 +142,33 @@ export class AppGateway {
   }
 
   /**
+   * 2️⃣ Quand le client émet "leaveRoom"
+   */
+  @SubscribeMessage('sendResponseInput')
+  receiveResponseInput(
+    @MessageBody() data: { inputResponse: string, questionId: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+    this.roomHandler.receiveResponseInput(this.server, client, data);
+  }
+
+  /**
    * 2️⃣ Quand l'admin client émet "checkTheAnswers"
    */
   @SubscribeMessage('checkTheAnswers')
   checkTheAnswers(@ConnectedSocket() client: Socket) {
     this.roomHandler.checkTheAnswers(this.server, client);
+  }
+
+  /**
+   * 2️⃣ Quand l'admin client émet "checkTheAnswers"
+   */
+  @SubscribeMessage('checkedTheAnswersInput')
+  checkedTheAnswersInput(@ConnectedSocket() client: Socket) {
+    const roomId = client.data?.roomId;
+    this.server.to('room_' + roomId).emit('resultsAvailable');
+    this.server.to('admin_' + roomId).emit('resultsAvailable');
+    this.server.to('screen_' + roomId).emit('resultsAvailable');
   }
 
   /**
