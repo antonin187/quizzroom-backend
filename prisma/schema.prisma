@@ -29,7 +29,7 @@ model Quizz {
   subtitle  String?
   s3Key     String? // ✅ URL publique de l'image S3
   questions Question[]
-  rooms Room[]
+  rooms     Room[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 }
@@ -45,6 +45,13 @@ model Question {
   quizzId Int?
   quizz   Quizz? @relation(fields: [quizzId], references: [id])
 
+  // Relation One-to-Many vers Room (question courante)
+  roomsAsCurrentQuestion Room[]
+
+  answers Answer[]
+
+  isDeleted Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -59,18 +66,47 @@ model Room {
 
   players Player[]
 
+  answers Answer[]
+
   // Relation Many-to-One vers Quizz
   quizzId Int
   quizz   Quizz @relation(fields: [quizzId], references: [id])
+
+  // Relation Many-to-One vers Question (question courante)
+  currentQuestionId Int?
+  currentQuestion   Question? @relation(fields: [currentQuestionId], references: [id])
 }
 
 model Player {
   id        Int      @id @default(autoincrement())
-  name      String
+  pseudo    String
+  connected Boolean  @default(true)
   score     Int      @default(0)
   socketId  String? // optionnel, pour associer à une socket active
   roomId    Int?
-  room      Room?     @relation(fields: [roomId], references: [id])
+  room      Room?    @relation(fields: [roomId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  answers Answer[]
+}
+
+model Answer {
+  id Int @id @default(autoincrement())
+
+  chosenIndex Int
+
+  playerId Int
+  player   Player? @relation(fields: [playerId], references: [id])
+
+  questionId Int
+  question   Question? @relation(fields: [questionId], references: [id])
+
+  roomId Int
+  room   Room? @relation(fields: [roomId], references: [id])
+
+  isCorrect Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

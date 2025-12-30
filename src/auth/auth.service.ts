@@ -2,6 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
+import { Player } from 'generated/prisma';
 
 @Injectable()
 export class AuthService {
@@ -33,9 +35,31 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { sub: user.id, email: user.email };
+    const payload = { sub: user.id, email: user.email, role: "ADMIN" };
     return {
       access_token: this.jwtService.sign(payload),
     };
+  }
+
+  async generatePlayertoken(player: Player) {
+    const payload = { playerId: player.id, roomId: player.roomId, pseudo: player.pseudo };
+    return {
+      player_token: this.jwtService.sign(payload),
+    };
+  }
+
+  verifyPlayerToken(token: string) {
+    try {
+      return this.jwtService.verify(token, {
+        secret: process.env.JWT_SECRET, // ← OBLIGATOIRE
+      }) as {
+        playerId: string;
+        roomId: string;
+        pseudo: string;
+      }
+    } catch (error) {
+      console.log
+      throw new UnauthorizedException('Invalid Token');
+    }
   }
 }

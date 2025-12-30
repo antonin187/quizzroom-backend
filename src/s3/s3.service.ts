@@ -3,6 +3,7 @@ import {
   S3Client,
   GetObjectCommand,
   PutObjectCommand,
+  HeadObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -19,13 +20,32 @@ export class S3Service {
   private bucket = process.env.AWS_BUCKET_NAME;
 
   // ✅ Génère une URL signée pour lire un fichier (GET)
-  async getSignedUrl(key: string): Promise<string> {
+  async getSignedUrl(key: string): Promise<{
+    url: string;
+    mimeType: string | null;
+  }> {
+    // 1️⃣ récupérer les métadonnées
+    const head = await this.s3.send(
+      new HeadObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+      }),
+    );
+
+    // 2️⃣ générer l’URL signée
     const command = new GetObjectCommand({
       Bucket: this.bucket,
       Key: key,
     });
 
-    return await getSignedUrl(this.s3, command, { expiresIn: 60 * 5 }); // 5 minutes
+    const url = await getSignedUrl(this.s3, command, {
+      expiresIn: 60 * 5,
+    });
+
+    return {
+      url,
+      mimeType: head.ContentType ?? null,
+    };
   }
 
   // ✅ Génère une URL signée pour uploader un fichier (PUT)
@@ -36,8 +56,10 @@ export class S3Service {
       ContentType: contentType,
     });
 
-    const response = await getSignedUrl(this.s3, command, { expiresIn: 60 * 5 });
+    const response = await getSignedUrl(this.s3, command, {
+      expiresIn: 60 * 5,
+    });
 
-    return {uploadUrl: response}
+    return { uploadUrl: response };
   }
 }

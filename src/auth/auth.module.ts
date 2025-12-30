@@ -7,6 +7,7 @@ import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from './jwt.strategy';
 import { UsersService } from 'src/users/users.service';
 import { PrismaService } from 'src/prisma.service';
+import { JwtPlayerStrategy } from './jwt-player.strategy';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { PrismaService } from 'src/prisma.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [PrismaService, UsersService, AuthService, JwtStrategy],
-  exports: [AuthService],
+  providers: [PrismaService, UsersService, AuthService, JwtStrategy, JwtPlayerStrategy],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

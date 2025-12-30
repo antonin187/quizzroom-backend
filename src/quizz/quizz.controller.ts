@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { QuizzService } from './quizz.service';
 import { CreateQuizzDto } from './dto/create-quizz.dto';
@@ -29,5 +29,10 @@ export class QuizzController {
   @Get()
   async findAll() {
     return this.quizzService.findAll();
+  }
+
+  @Get('room/:roomCode')
+  async findByRoomCode(@Param('roomCode') roomCode: string) {
+    return this.quizzService.findByRoomCode(roomCode.toUpperCase());
   }
 }
